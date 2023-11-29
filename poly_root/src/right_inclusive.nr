@@ -1,5 +1,5 @@
 /// The following does a `from < x <= to`
-fn right_inclusive(x: Field, from: Field, to: Field) -> bool {
+pub fn check(x: Field, from: Field, to: Field) -> bool {
   let mut p = x - (from + 1);
 
   for i in (from + 2)..(to + 1) {
@@ -15,16 +15,16 @@ fn right_inclusive(x: Field, from: Field, to: Field) -> bool {
 
 #[test]
 fn test_in_range() {
-  assert(right_inclusive(11, 10, 50));
-  assert(right_inclusive(50, 10, 50));
-  assert(right_inclusive(49, 10, 50));
-  assert(right_inclusive(30, 10, 50));
+  assert(check(11, 10, 50));
+  assert(check(50, 10, 50));
+  assert(check(49, 10, 50));
+  assert(check(30, 10, 50));
 }
 
 #[test]
 fn test_not_in_range() {
-  assert(!right_inclusive(9, 10, 50));
-  assert(!right_inclusive(10, 10, 50));
-  assert(!right_inclusive(51, 10, 50));
-  assert(!right_inclusive(100, 10, 50));
+  assert(!check(9, 10, 50));
+  assert(!check(10, 10, 50));
+  assert(!check(51, 10, 50));
+  assert(!check(100, 10, 50));
 }
