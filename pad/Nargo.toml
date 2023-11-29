@@ -1,5 +1,5 @@
 [package]
-name = "base64"
+name = "pad"
 type = "lib"
 authors = [""]
 compiler_version = ">=0.19.2"
