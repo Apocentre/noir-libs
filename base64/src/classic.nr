@@ -66,4 +66,9 @@ impl Classic {
 
     base64_index
   }
+
+  pub fn get_padding_char() -> Field {
+    // this is the equvalent of '='
+    64
+  }
 }
