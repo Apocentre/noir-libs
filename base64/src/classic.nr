@@ -11,7 +11,7 @@ impl Classic {
   pub fn get_char_for_index(index: Field) -> Option<Field> {
     let mut ascii_index = Option::none();
 
-    // TODO: try polynomial root trics for the following range comparisons to see if we reduce contraint count
+    // TODO: compare the number of circuits using a simple Field to integer conversion instead
     if full_inclusive::check(index, 0, 25) {
       // A-Z
       ascii_index = Option::some(index + UPPERCASEOFFSET);
@@ -36,5 +36,34 @@ impl Classic {
     };
 
     ascii_index
+  }
+
+  pub fn get_index_for_char(character: Field) -> Option<Field> {
+    let mut base64_index = Option::none();
+
+    // TODO: compare the number of circuits using a simple Field to integer conversion instead
+    if full_inclusive::check(character, 65, 90) {
+      // A-Z
+      base64_index = Option::some(character - UPPERCASEOFFSET);
+    } else {
+      if full_inclusive::check(character, 97, 122) {
+        // a-z
+        base64_index = Option::some(character - LOWERCASEOFFSET);
+      } else {
+        if full_inclusive::check(character, 48, 57) {
+          base64_index = Option::some(character + DIGITOFFSET);
+        } else {
+          if character == 43 {
+            base64_index = Option::some(62);
+          } else {
+            if character == 47 {
+              base64_index = Option::some(63);
+            }
+          }
+        }
+      }
+    };
+
+    base64_index
   }
 }
