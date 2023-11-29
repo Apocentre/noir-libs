@@ -1,4 +1,5 @@
 use dep::std::option::Option;
+use dep::std;
 
 global UPPERCASEOFFSET: u8 = 65;
 global LOWERCASEOFFSET: u8 = 71;

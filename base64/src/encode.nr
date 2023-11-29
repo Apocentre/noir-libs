@@ -49,7 +49,7 @@ fn split(chunk: [Field]) -> [Field] {
 
 /// Takes a list of up to 4 six-bit bytes and encodes them to base64
 fn encode_chunk(chunk: [Field], len: u64) -> [Field] {
-  let mut out: [Field] = [];
+  let mut out = [];
 
   for i in 0..len {
     let chr = get_char_for_index(chunk[i] as u8);
@@ -60,8 +60,9 @@ fn encode_chunk(chunk: [Field], len: u64) -> [Field] {
     }
   }
 
-  // We need to replicate the code below. that is if the len is < 4 we need to pad right
-  // let mut out = [get_padding_char(); 4].as_slice();
+  for i in 0..(4 - len) {
+    out = out.push_back(get_padding_char() as Field);
+  }
 
   out
 }
@@ -98,7 +99,16 @@ fn encode(value: [Field]) -> [Field] {
   }
 
   let chunk = split(remaining_chunk);
-  let encoded_chunk = encode_chunk(chunk, remaining);
+  let remaining_chunk_len = chunk.len();
+  let mut encoded_chunk = [];
+
+  if remaining_chunk_len == 1 {
+    encoded_chunk = encode_chunk(chunk, 1);
+  } else {
+    if remaining_chunk_len == 2 {
+      encoded_chunk = encode_chunk(chunk, 2);
+    }
+  };
 
   for i in 0..remaining {
     result = result.push_back(encoded_chunk[i] as Field);
@@ -117,19 +127,9 @@ fn test_encode_with_trailing_equal() {
     82, 65, 61, 61,
   ];
   let result = encode(value);
-  
-  // let v_0 = 65 as u8 >> 2;
-  // let v_1 = (65 as u8 & 3) << 4 | 66 as u8 >> 4;
-  // let v_2 = (66 as u8 & 15) << 2 | 67 as u8 >> 6;
-  // let v_3 = (67 as u8 & 63);
-
-  // std::println(v_0); // 16
-  // std::println(v_1); // 20
-  // std::println(v_2); // 9
-  // std::println(v_3); // 3
 
   for i in 0..4 {
-    std::println(result[i]);
+    // std::println(result[i]);
     // assert(result[i] == expected[i]);
   }
 }
