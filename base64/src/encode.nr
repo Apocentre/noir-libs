@@ -8,30 +8,35 @@ use crate::classic::{get_char_for_index, get_padding_char};
 fn split(chunk: [Field]) -> [Field] {
   let len = chunk.len();
   let mut result: [Field] = [];
+  let val_1 = chunk[0] as u8;
 
   // In case of a 1-byte input, we return two bytes where the first 6 bits of the input byte are returned as the
   // first output byte, the last two bits of the input byte are returned as the second byte
   if len == 1 {
     result = [
-      (chunk[0] as u8 >> 2) as Field,
-      ((chunk[0] as u8 & 3) << 4) as Field,
+      (val_1 >> 2) as Field,
+      ((val_1 & 3) << 4) as Field,
     ];
   } else {
+    let val_2 = chunk[1] as u8;
+
     if len == 2 {
       result = [
-        (chunk[0] as u8  >> 2) as Field,
-        ((chunk[0] as u8 & 3) << 4 | chunk[1] as u8 >> 4) as Field,
-        ((chunk[1] as u8 & 15) << 2) as Field,
+        (val_1 >> 2) as Field,
+        ((val_1 & 3) << 4 | val_2 >> 4) as Field,
+        ((val_2 & 15) << 2) as Field,
       ];
     } else {
       // In case of a 3 byte input, we follow the same kind of steps to piece different parts of the bytes together to
       // form 4 output bytes each holding 6 bits of information.
       if len == 3 {
+        let val_3 = chunk[2] as u8;
+
         result = [
-          (chunk[0] as u8 >> 2) as Field,
-          ((chunk[0] as u8 & 3) << 4 | chunk[1] as u8 >> 4) as Field,
-          ((chunk[1] as u8 & 15) << 2 | chunk[2] as u8 >> 6) as Field,
-          (chunk[2] as u8 & 63) as Field,
+          (val_1 >> 2) as Field,
+          ((val_1 & 3) << 4 | val_2 >> 4) as Field,
+          ((val_2 & 15) << 2 | val_3 >> 6) as Field,
+          (val_3 & 63) as Field,
         ];
       } else {
         assert(false, "Chunk must have 3 items at most");
@@ -80,7 +85,7 @@ fn encode(value: [Field]) -> [Field] {
     let encoded_chunk = encode_chunk(chunk, 3);
 
     for i in 0..3 {
-      result = result.push_back(encoded_chunk[i]);
+      result = result.push_back(encoded_chunk[i] as Field);
     }
   }
 
@@ -96,7 +101,7 @@ fn encode(value: [Field]) -> [Field] {
   let encoded_chunk = encode_chunk(chunk, remaining);
 
   for i in 0..remaining {
-    result = result.push_back(encoded_chunk[i]);
+    result = result.push_back(encoded_chunk[i] as Field);
   }
 
   result
@@ -112,7 +117,16 @@ fn test_encode_with_trailing_equal() {
     82, 65, 61, 61,
   ];
   let result = encode(value);
+  
+  // let v_0 = 65 as u8 >> 2;
+  // let v_1 = (65 as u8 & 3) << 4 | 66 as u8 >> 4;
+  // let v_2 = (66 as u8 & 15) << 2 | 67 as u8 >> 6;
+  // let v_3 = (67 as u8 & 63);
 
+  // std::println(v_0); // 16
+  // std::println(v_1); // 20
+  // std::println(v_2); // 9
+  // std::println(v_3); // 3
 
   for i in 0..4 {
     std::println(result[i]);
