@@ -5,33 +5,33 @@ use crate::classic::{get_char_for_index, get_padding_char};
 
 /// Converts eight-bit bytes into six-bit bytes.
 /// To do so it takes up to 3 bytes chunks
-fn split(chunk: [u8]) -> [u8] {
+fn split(chunk: [Field]) -> [Field] {
   let len = chunk.len();
-  let mut result: [u8] = [];
+  let mut result: [Field] = [];
 
   // In case of a 1-byte input, we return two bytes where the first 6 bits of the input byte are returned as the
   // first output byte, the last two bits of the input byte are returned as the second byte
   if len == 1 {
     result = [
-      chunk[0] >> 2,
-      (chunk[0] & 3) << 4
+      (chunk[0] as u8 >> 2) as Field,
+      ((chunk[0] as u8 & 3) << 4) as Field,
     ];
   } else {
     if len == 2 {
       result = [
-        chunk[0]  >> 2,
-        (chunk[0] & 3) << 4 | chunk[1] >> 4,
-        (chunk[1] & 15) << 2,
+        (chunk[0] as u8  >> 2) as Field,
+        ((chunk[0] as u8 & 3) << 4 | chunk[1] as u8 >> 4) as Field,
+        ((chunk[1] as u8 & 15) << 2) as Field,
       ];
     } else {
       // In case of a 3 byte input, we follow the same kind of steps to piece different parts of the bytes together to
       // form 4 output bytes each holding 6 bits of information.
       if len == 3 {
         result = [
-          chunk[0] >> 2,
-          (chunk[0] & 3) << 4 | chunk[1] >> 4,
-          (chunk[1] & 15) << 2 | chunk[2] >> 6,
-          chunk[2] & 63,
+          (chunk[0] as u8 >> 2) as Field,
+          ((chunk[0] as u8 & 3) << 4 | chunk[1] as u8 >> 4) as Field,
+          ((chunk[1] as u8 & 15) << 2 | chunk[2] as u8 >> 6) as Field,
+          (chunk[2] as u8 & 63) as Field,
         ];
       } else {
         assert(false, "Chunk must have 3 items at most");
@@ -43,11 +43,11 @@ fn split(chunk: [u8]) -> [u8] {
 }
 
 /// Takes a list of up to 4 six-bit bytes and encodes them to base64
-fn encode_chunk(chunk: [u8], len: u64) -> [Field] {
+fn encode_chunk(chunk: [Field], len: u64) -> [Field] {
   let mut out: [Field] = [];
 
   for i in 0..len {
-    let chr = get_char_for_index(chunk[i]);
+    let chr = get_char_for_index(chunk[i] as u8);
 
     if Option::is_some(chr) {
       // If we use u8 the runtime panics complaining about incompatible types
@@ -61,11 +61,11 @@ fn encode_chunk(chunk: [u8], len: u64) -> [Field] {
   out
 }
 
-fn encode(value: [u8]) -> [u8] {
+fn encode(value: [Field]) -> [Field] {
   let value_len = value.len() as u64;
   let chunk_count = value_len / 3;
   let remaining = value_len % 3;
-  let mut result: [u8] = [];
+  let mut result = [];
 
   for i in 0..chunk_count {
     let start_index = 0 + (i * 3);
@@ -80,23 +80,23 @@ fn encode(value: [u8]) -> [u8] {
     let encoded_chunk = encode_chunk(chunk, 3);
 
     for i in 0..3 {
-      result = result.push_back(encoded_chunk[i] as u8);
+      result = result.push_back(encoded_chunk[i]);
     }
   }
 
   // do the same for the remaining items
   // TODO: abstract this common code 
-  let mut remaining_chunk: [u8] = [];
+  let mut remaining_chunk: [Field] = [];
 
   for i in 0..remaining {
-    remaining_chunk.push_back(value[value_len - i])
+    remaining_chunk = remaining_chunk.push_back(value[value_len - i - 1]);
   }
 
   let chunk = split(remaining_chunk);
   let encoded_chunk = encode_chunk(chunk, remaining);
 
   for i in 0..remaining {
-    result = result.push_back(encoded_chunk[i] as u8);
+    result = result.push_back(encoded_chunk[i]);
   }
 
   result
@@ -105,19 +105,19 @@ fn encode(value: [u8]) -> [u8] {
 #[test]
 fn test_encode_with_trailing_equal() {
   // "ABCD" in bytes
-  let value: [u8] = [65, 66, 67, 68];
+  let value: [Field] = [65, 66, 67, 68];
   // "QUJDRA==" in bytes
-  let expected: [u8] = [
+  let expected: [Field] = [
     81, 85, 74, 68,
     82, 65, 61, 61,
   ];
   let result = encode(value);
 
-  std::println(result.len());
 
-  // for i in 0..8 {
-  //   assert(result[i] == expected[i]);
-  // }
+  for i in 0..4 {
+    std::println(result[i]);
+    // assert(result[i] == expected[i]);
+  }
 }
 
 // #[test]
