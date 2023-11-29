@@ -1,5 +1,3 @@
-use dep::std;
-
 pub fn pad_left(value: [Field], count: Field, delim: Field) -> [Field] {
   let mut final = value;
 
