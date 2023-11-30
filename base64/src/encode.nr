@@ -60,7 +60,10 @@ fn encode_chunk(chunk: [Field], len: u64) -> [Field] {
     }
   }
 
-  for _ in 0..(4 - len) {
+  // TODO: if we use 0..(4-len) which is the correct way, it panics.
+  // So we just append 4 padding chars, which doesn't break the logic really
+  // since we're consuming the first 4 bytes of the returned encoded chunk.
+  for _ in 0..4 {
     out = out.push_back(get_padding_char() as Field);
   }
 
@@ -74,7 +77,7 @@ fn encode(value: [Field]) -> [Field] {
   let mut result = [];
 
   for i in 0..chunk_count {
-    let start_index = 0 + (i * 3);
+    let start_index = i * 3;
 
     let chunk = [
       value[start_index],
@@ -83,15 +86,14 @@ fn encode(value: [Field]) -> [Field] {
     ];
 
     let chunk = split(chunk);
-    let encoded_chunk = encode_chunk(chunk, 3);
+    let encoded_chunk = encode_chunk(chunk, 4);
 
-    for i in 0..3 {
+    for i in 0..4 {
       result = result.push_back(encoded_chunk[i] as Field);
     }
   }
 
   // do the same for the remaining items
-  // TODO: abstract this common code 
   let mut remaining_chunk: [Field] = [];
 
   for i in 0..remaining {
@@ -107,10 +109,11 @@ fn encode(value: [Field]) -> [Field] {
   } else {
     if remaining_chunk_len == 2 {
       encoded_chunk = encode_chunk(chunk, 2);
+      
     }
   };
 
-  for i in 0..remaining {
+  for i in 0..4 {
     result = result.push_back(encoded_chunk[i] as Field);
   }
 
@@ -124,13 +127,12 @@ fn test_encode_with_trailing_equal() {
   // "QUJDRA==" in bytes
   let expected: [Field] = [
     81, 85, 74, 68,
-    82, 65, 61, 61,
+    82, 65, get_padding_char() as Field, get_padding_char() as Field,
   ];
   let result = encode(value);
 
-  for i in 0..4 {
-    // std::println(result[i]);
-    // assert(result[i] == expected[i]);
+  for i in 0..8 {
+    assert(result[i] == expected[i]);
   }
 }
 
