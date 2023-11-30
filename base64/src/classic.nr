@@ -9,7 +9,6 @@ pub fn get_char_for_index(index: u8) -> Option<u8> {
   let mut ascii_index = Option::none();
 
   if index >= 0 & index <= 25 {
-    std::println(index);
     // A-Z
     ascii_index = Option::some(index + UPPERCASEOFFSET);
   } else {
@@ -19,7 +18,6 @@ pub fn get_char_for_index(index: u8) -> Option<u8> {
     } else {
       if index >= 52 & index <= 61 {
         // 0-9
-        std::println(">>>>>>>>>>>>>>>>>>>>>>>>");
         ascii_index = Option::some(index - DIGITOFFSET);
       } else {
         if index == 62 {
