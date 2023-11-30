@@ -1,5 +1,4 @@
 use dep::std::option::Option;
-use dep::std::collections::vec::Vec;
 use dep::std;
 use crate::classic::{get_char_for_index, get_padding_char};
 
@@ -70,8 +69,9 @@ fn encode_chunk(chunk: [Field], len: u64) -> [Field] {
   out
 }
 
-fn encode(value: &mut [Field]) -> [Field] {
-  let value_len = value.len() as u64;
+pub fn encode(value: [Field], value_len: u64) -> [Field] {
+  assert((value.len() as u64) == value_len);
+
   let chunk_count = value_len / 3;
   let remaining = value_len % 3;
   let mut result = [];
@@ -110,7 +110,6 @@ fn encode(value: &mut [Field]) -> [Field] {
     } else {
       if remaining_chunk_len == 2 {
         encoded_chunk = encode_chunk(chunk, 2);
-        
       }
     };
 
@@ -125,13 +124,13 @@ fn encode(value: &mut [Field]) -> [Field] {
 #[test]
 fn test_encode_with_trailing_equal() {
   // "ABCD" in bytes
-  let mut value: [Field] = [65, 66, 67, 68];
+  let value: [Field] = [65, 66, 67, 68];
   // "QUJDRA==" in bytes
   let expected: [Field] = [
     81, 85, 74, 68,
     82, 65, get_padding_char() as Field, get_padding_char() as Field,
   ];
-  let result = encode(&mut value);
+  let result = encode(value, 4);
 
   for i in 0..8 {
     assert(result[i] == expected[i]);
@@ -141,10 +140,10 @@ fn test_encode_with_trailing_equal() {
 #[test]
 fn test_encode_no_trailing_equal() {
   // "ABC" in bytes
-  let mut value = [65, 66, 67];
+  let value = [65, 66, 67];
   // "QUJD" in bytes
   let expected = [81, 85, 74, 68];
-  let result = encode(&mut value);
+  let result = encode(value, 3);
 
   for i in 0..4 {
     assert(result[i] == expected[i]);
