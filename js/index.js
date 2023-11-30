@@ -23,6 +23,7 @@ const fromByteArray = (byteArray) => {
 }
 
 const main = () => {
+  // example '"sub":"some_user_id""
   const userId = toByteArray(data.userId);
   const jwt = toByteArray(data.jwt);
 
