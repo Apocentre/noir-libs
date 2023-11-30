@@ -93,28 +93,30 @@ fn encode(value: [Field]) -> [Field] {
     }
   }
 
-  // do the same for the remaining items
-  let mut remaining_chunk: [Field] = [];
+  if remaining != 0 {
+    // do the same for the remaining items
+    let mut remaining_chunk: [Field] = [];
 
-  for i in 0..remaining {
-    remaining_chunk = remaining_chunk.push_back(value[value_len - i - 1]);
-  }
-
-  let chunk = split(remaining_chunk);
-  let remaining_chunk_len = chunk.len();
-  let mut encoded_chunk = [];
-
-  if remaining_chunk_len == 1 {
-    encoded_chunk = encode_chunk(chunk, 1);
-  } else {
-    if remaining_chunk_len == 2 {
-      encoded_chunk = encode_chunk(chunk, 2);
-      
+    for i in 0..remaining {
+      remaining_chunk = remaining_chunk.push_back(value[value_len - i - 1]);
     }
-  };
 
-  for i in 0..4 {
-    result = result.push_back(encoded_chunk[i] as Field);
+    let chunk = split(remaining_chunk);
+    let remaining_chunk_len = chunk.len();
+    let mut encoded_chunk = [];
+
+    if remaining_chunk_len == 1 {
+      encoded_chunk = encode_chunk(chunk, 1);
+    } else {
+      if remaining_chunk_len == 2 {
+        encoded_chunk = encode_chunk(chunk, 2);
+        
+      }
+    };
+
+    for i in 0..4 {
+      result = result.push_back(encoded_chunk[i] as Field);
+    }
   }
 
   result
@@ -136,15 +138,15 @@ fn test_encode_with_trailing_equal() {
   }
 }
 
-// #[test]
-// fn test_encode_no_trailing_equal() {
-//   // "ABC" in bytes
-//   let value = [65, 66, 67];
-//   // "QUJD" in bytes
-//   let expected = [81, 85, 74, 68];
-//   let result = encode(value);
+#[test]
+fn test_encode_no_trailing_equal() {
+  // "ABC" in bytes
+  let value = [65, 66, 67];
+  // "QUJD" in bytes
+  let expected = [81, 85, 74, 68];
+  let result = encode(value);
 
-//   for i in 0..4 {
-//     assert(result[i] == expected[i]);
-//   }
-// }
+  for i in 0..4 {
+    assert(result[i] == expected[i]);
+  }
+}
