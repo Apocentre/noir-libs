@@ -81,3 +81,17 @@ fn test_get_char_for_index() {
   let result = get_char_for_index(64);
   assert(Option::is_none(result));
 }
+
+#[test]
+fn test_get_index_for_char() {
+  let value: [u8] = [65, 75, 90, 97, 106, 122, 48, 51, 57, 43, 47];
+  let expected: [u8] = [0, 10, 25, 26, 35, 51, 52, 55, 61, 62, 63];
+
+  for i in 0..11 {
+    let result = Option::unwrap(get_index_for_char(value[i]));
+    assert(result == expected[i]);
+  }
+
+  let result = get_index_for_char(58);
+  assert(Option::is_none(result));
+}
