@@ -27,7 +27,7 @@ const main = () => {
   const jwt = toByteArray(data.jwt);
 
   // generate the text at all possible three-byte offsets, and remove the characters that might be influenced by the context
-  const offset_0 = btoa(fromByteArray(userId));
+  let offset_0 = btoa(fromByteArray(userId));
   // add one character infront. @ is 64 in decimal
   let offset_1 = btoa(fromByteArray(new Uint8Array([64, ...userId])));
   // add two character infront
@@ -45,15 +45,15 @@ const main = () => {
 
   console.log({offset_0, offset_1, offset_2});
 
-  offset_1 = toByteArray(offset_1);
-  const userIdLen = offset_1.length;
+  offset_0 = toByteArray(offset_0);
+  const subLen = offset_0.length;
 
-  // we know that the offset_1 version is a the version that is part of the encoded jwt.
-  const startIndex = 431;
+  // we know that the offset_0 version is a the version that is part of the encoded jwt.
+  const startIndex = 483;
 
-  // Assert that that offset_1 is indeed part of the encoded jwt
-  for (let i = startIndex, j = 0; i < startIndex + userIdLen; i++, j++) {
-    assert(jwt[i] === offset_1[j]);
+  // Assert that that offset_0 is indeed part of the encoded jwt
+  for (let i = startIndex, j = 0; i < startIndex + subLen; i++, j++) {
+    assert(jwt[i] === offset_0[j]);
   }
 }
 
