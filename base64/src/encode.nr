@@ -60,7 +60,7 @@ fn encode_chunk(chunk: [Field], len: u64) -> [Field] {
     }
   }
 
-  for i in 0..(4 - len) {
+  for _ in 0..(4 - len) {
     out = out.push_back(get_padding_char() as Field);
   }
 

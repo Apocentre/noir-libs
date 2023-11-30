@@ -66,3 +66,18 @@ pub fn get_padding_char() -> u8 {
   // this is the equvalent of '='
   64
 }
+
+
+#[test]
+fn test_get_char_for_index() {
+  let value: [u8] = [0, 10, 25, 26, 35, 51, 52, 55, 61, 62, 63];
+  let expected: [u8] = [65, 75, 90, 97, 106, 122, 48, 51, 57, 43, 47];
+
+  for i in 0..11 {
+    let result = Option::unwrap(get_char_for_index(value[i]));
+    assert(result == expected[i]);
+  }
+
+  let result = get_char_for_index(64);
+  assert(Option::is_none(result));
+}
