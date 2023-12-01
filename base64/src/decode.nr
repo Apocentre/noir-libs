@@ -4,6 +4,7 @@ use dep::collections::dynamic_array::DynamicArray;
 use crate::classic::{get_index_for_char, get_padding_char};
 use crate::encode::encode;
 
+global MAX_SIZE: u64 = 2000;
 
 fn remove_zeros(list: [Field; 4]) -> [Option<Field>; 4] {
   let mut result: [Option<Field>] = [];
@@ -17,73 +18,6 @@ fn remove_zeros(list: [Field; 4]) -> [Option<Field>; 4] {
   }
 
   result
-}
-
-/// Reverse of split we're taking the various bits from two or more bytes and put it back together
-/// It takes a slice of bytes and returns another slice of bytes, containing a maximum of three 8-bit numbers.
-fn stich(chunk: [Field; 4], len: u64) -> [Field] {
-  let mut result: [Field] = [];
-  let val_1 = chunk[0] as u8;
-
-  if len == 2 {
-    let val_2 = chunk[1] as u8;
-
-    result = [
-      ((val_1 & 63) << 2 | val_2 >> 4) as Field,
-      ((val_2 & 15) << 4) as Field,
-    ];
-
-    result = remove_zeros(result, 2);
-  } else {
-    let val_2 = chunk[1] as u8;
-    let val_3 = chunk[2] as u8;
-
-    if len == 3 {
-      result = [
-        ((val_1 & 63) << 2 | val_2 >> 4) as Field,
-        ((val_2 & 15) << 4 | val_3 >> 2) as Field,
-        ((val_3 & 3) << 6) as Field,
-      ];
-    } else {
-      let val_4 = chunk[3] as u8;
-
-      // In case of a 3 byte input, we follow the same kind of steps to piece different parts of the bytes together to
-      // form 4 output bytes each holding 6 bits of information.
-      if len == 4 {
-        result = [
-          ((val_1 & 63) << 2 | val_2 >> 4) as Field,
-          ((val_2 & 15) << 4 | val_3 >> 2) as Field,
-          ((val_3 & 3) << 6 | val_4 & 63) as Field,
-        ];
-      } else {
-        assert(false, "Chunk must have 2 to 4 items at most");
-      }
-
-      std::println(result.len());
-      result = remove_zeros(result, 3);
-    }
-  };
-
-  result
-}
-
-/// Takes a slice of chars (maximum of 4-bytes). It filters the padding characters and uses the looks up the left-over
-/// characters in our alphabet. Returning a slice of bytes as the original data.
-fn original(chunk: [Field; 4], len: u64) -> [Field] {
-  let mut out = [];
-
-  for i in 0..len {
-    let chr = get_index_for_char(chunk[i] as u8);
-
-    if Option::is_some(chr) {
-      let ch = Option::unwrap(chr);
-      if ch != get_padding_char() {
-        out = out.push_back(ch as Field);
-      }
-    }
-  }
-
-  out
 }
 
 fn copy_decoded_chunk(mut result: [Field], decoded_chunk: [Field]) -> [Field] {
@@ -110,6 +44,71 @@ fn copy_decoded_chunk(mut result: [Field], decoded_chunk: [Field]) -> [Field] {
   result
 }
 
+/// Reverse of split we're taking the various bits from two or more bytes and put it back together
+/// It takes a slice of bytes and returns another slice of bytes, containing a maximum of three 8-bit numbers.
+fn stich(chunk: DynamicArray<Field, 4>) -> DynamicArray<Field, 4> {
+  let len = chunk.len();
+  let mut out = DynamicArray::init(0, len);
+  let val_1 = chunk.get(0).unwrap() as u8;
+  
+  if len == 2 {
+    let val_2 = chunk.get(1).unwrap() as u8;
+    out.update(0, ((val_1 & 63) << 2 | val_2 >> 4) as Field);
+    out.update(1, ((val_2 & 15) << 4) as Field);
+
+
+    out = remove_zeros(out, 2);
+  } else {
+    let val_2 = chunk.get(1).unwrap() as u8;
+    let val_3 = chunk.get(2).unwrap() as u8;
+
+    if len == 3 {
+      out.update(0, ((val_1 & 63) << 2 | val_2 >> 4) as Field);
+      out.update(1, ((val_2 & 15) << 4 | val_3 >> 2) as Field);
+      out.update(1, ((val_3 & 3) << 6) as Field);
+    } else {
+      let val_4 = chunk[3] as u8;
+
+      // In case of a 3 byte input, we follow the same kind of steps to piece different parts of the bytes together to
+      // form 4 output bytes each holding 6 bits of information.
+      if len == 4 {
+        out = [
+          ((val_1 & 63) << 2 | val_2 >> 4) as Field,
+          ((val_2 & 15) << 4 | val_3 >> 2) as Field,
+          ((val_3 & 3) << 6 | val_4 & 63) as Field,
+        ];
+      } else {
+        assert(false, "Chunk must have 2 to 4 items at most");
+      }
+
+      std::println(out.len());
+      out = remove_zeros(out, 3);
+    }
+  };
+
+  out
+}
+
+/// Takes a slice of chars (maximum of 4-bytes). It filters the padding characters and uses the looks up the left-over
+/// characters in our alphabet. Returning a slice of bytes as the original data.
+fn original(chunk: [Field; 4], len: u64) -> DynamicArray<Field, 4> {
+  let mut out = DynamicArray::init(0, len);
+
+  for i in 0..len {
+    let chr = get_index_for_char(chunk[i] as u8);
+
+    if Option::is_some(chr) {
+      let ch = Option::unwrap(chr);
+
+      if ch != get_padding_char() {
+        out.push(ch as Field);
+      }
+    }
+  }
+
+  out
+}
+
 /// Base64 decode the given value which can gave up to MAX_DECODE_LENGTH items.
 /// The actual content to be decoded has length that is defined by `value_len` 
 pub fn decode(value: DynamicArray<Field, 2000>) -> [Field] {
@@ -125,10 +124,10 @@ pub fn decode(value: DynamicArray<Field, 2000>) -> [Field] {
     let start_index = (i * 4) as Field;
 
     let chunk = [
-      value.get(start_index),
-      value.get(start_index + 1),
-      value.get(start_index + 2),
-      value.get(start_index + 3),
+      value.get(start_index).unwrap(),
+      value.get(start_index + 1).unwrap(),
+      value.get(start_index + 2).unwrap(),
+      value.get(start_index + 3).unwrap(),
     ];
 
     let original_chunk = original(chunk, 4);

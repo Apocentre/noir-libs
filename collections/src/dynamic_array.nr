@@ -1,17 +1,60 @@
 use dep::std::option::Option;
+
+global EXIST: u8 = 0;
+global NULL: u8 = 1;
+global DELETED: u8 = 2;
+
+struct Item<T> {
+  status: u8,
+  value: Option<T>,
+}
+
+impl <T> Item<T> {
+  fn new(value: T) -> Item<T> {
+    Item {
+      status: EXIST,
+      value: Option::some(value),
+    }
+  }
+
+  fn default() -> Item<T> {
+    Item {
+      status: NULL,
+      value: Option::none(),
+    }
+  }
+
+  fn has_value(self) -> bool {
+    self.status == EXIST
+  }
+
+  fn unwrap(self) -> T {
+    self.value.unwrap()
+  }
+
+  fn is_null(self) -> bool {
+    self.status == NULL
+  }
+
+  fn delete(mut self) {
+    self.status = DELETED;
+    self.value = Option::none();
+  } 
+}
+
 struct DynamicArray<T, MAX_SIZE> {
   /// The real lenth of the array; i.e. the amount of items it has
-  len: u16,
+  len: u64,
   /// Fixed array of 
-  data: [Option<T>; MAX_SIZE],
+  data: [Item<T>; MAX_SIZE],
 }
 
 impl <T, MAX_SIZE> DynamicArray<T, MAX_SIZE> {
-  fn init(value: T, len: u16) -> DynamicArray<T, MAX_SIZE> {
-    let mut data = [Option::none(); MAX_SIZE];
+  pub fn init(value: T, len: u64) -> DynamicArray<T, MAX_SIZE> {
+    let mut data = [Item::default(); MAX_SIZE];
 
     for i in 0..(MAX_SIZE - len) {
-      data[i] = Option::some(value);
+      data[i] = Item::new(value);
     }
 
     DynamicArray {
@@ -20,21 +63,41 @@ impl <T, MAX_SIZE> DynamicArray<T, MAX_SIZE> {
     }
   }
 
-  fn len(self) -> u16 {
+  pub fn len(self) -> u64 {
     self.len
   }
 
-  fn get(self, index: Field) -> Option<T> {
+  pub fn get(self, index: Field) -> Item<T> {
     self.data[index]
   }
 
-  fn has_value(self, index: Field) -> bool {
-    let val = self.data[index];
-
-    Option::is_some(val)
+  pub fn has_value(self, index: Field) -> bool {
+    self.data[index].has_value()
   }
 
-  fn unwrap(self, index: Field) -> T {
+  pub fn unwrap(self, index: Field) -> T {
     self.data[index].unwrap()
+  }
+
+  pub fn push(mut self, value: T) {
+    self.data[self.len] = Item::new(value);
+    self.len += 1;
+  }
+
+  pub fn update(mut self, index: Field, value: T) {
+    // you can only update an existing or deleted values
+    assert(self.data[index].is_null());
+    self.data[index] = Item::new(value);
+  }
+
+  pub fn filter(mut self, p: fn(T) -> bool) {
+    for i in 0..self.len {
+      let val = self.data[i];
+
+      if val.has_value() & !p(val.unwrap()) {
+        val.delete();
+      }
+    }
+      
   }
 }
