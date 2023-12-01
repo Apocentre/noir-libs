@@ -4,7 +4,7 @@ use dep::collections::dynamic_array::DynamicArray;
 use crate::classic::{get_index_for_char, get_padding_char};
 use crate::encode::encode;
 
-global MAX_SIZE: u64 = 2000;
+global MAX_SIZE: u64 = 200;
 
 /// Reverse of split we're taking the various bits from two or more bytes and put it back together
 /// It takes a slice of bytes and returns another slice of bytes, containing a maximum of three 8-bit numbers.
@@ -69,7 +69,7 @@ fn original(chunk: DynamicArray<Field, 4>) -> DynamicArray<Field, 4> {
   out
 }
 
-fn extend_with_decode_chunk(out: &mut DynamicArray<Field, 2000>, decoded_chunk: DynamicArray<Field, 4>) {
+fn extend_with_decode_chunk(out: &mut DynamicArray<Field, MAX_SIZE>, decoded_chunk: DynamicArray<Field, 4>) {
   let len = decoded_chunk.len();
 
   if len == 1 {
@@ -87,7 +87,7 @@ fn extend_with_decode_chunk(out: &mut DynamicArray<Field, 2000>, decoded_chunk: 
 
 /// Base64 decode the given value which can gave up to MAX_DECODE_LENGTH items.
 /// The actual content to be decoded has length that is defined by `value_len` 
-pub fn decode(value: DynamicArray<Field, 2000>, value_len: u64) -> DynamicArray<Field, 2000> {
+pub fn decode(value: DynamicArray<Field, MAX_SIZE>, value_len: u64) -> DynamicArray<Field, MAX_SIZE> {
   // data MUST be multiple of 4
   assert(value_len == value.len());
   assert(value_len % 4 == 0);
