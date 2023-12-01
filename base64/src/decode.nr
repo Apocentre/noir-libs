@@ -3,10 +3,14 @@ use dep::std;
 use crate::classic::{get_index_for_char, get_padding_char};
 use crate::encode::encode;
 
-fn remove_zeros(list: [Field], len: u64) -> [Field] {
-  let mut result: [Field] = [];
 
-  for i in 0..len {
+
+
+
+fn remove_zeros(list: [Field; 4]) -> [Option<Field>; 4] {
+  let mut result: [Option<Field>] = [];
+
+  for i in 0..4 {
     let val = list[i];
 
     if val != 0 {
@@ -19,10 +23,9 @@ fn remove_zeros(list: [Field], len: u64) -> [Field] {
 
 /// Reverse of split we're taking the various bits from two or more bytes and put it back together
 /// It takes a slice of bytes and returns another slice of bytes, containing a maximum of three 8-bit numbers.
-fn stich(chunk: [Field]) -> [Field] {
+fn stich(chunk: [Field; 4], len: u64) -> [Field] {
   let mut result: [Field] = [];
   let val_1 = chunk[0] as u8;
-  let len = chunk.len();
 
   if len == 2 {
     let val_2 = chunk[1] as u8;
@@ -68,7 +71,7 @@ fn stich(chunk: [Field]) -> [Field] {
 
 /// Takes a slice of chars (maximum of 4-bytes). It filters the padding characters and uses the looks up the left-over
 /// characters in our alphabet. Returning a slice of bytes as the original data.
-fn original(chunk: [Field], len: u64) -> [Field] {
+fn original(chunk: [Field; 4], len: u64) -> [Field] {
   let mut out = [];
 
   for i in 0..len {
@@ -109,14 +112,16 @@ fn copy_decoded_chunk(mut result: [Field], decoded_chunk: [Field]) -> [Field] {
   result
 }
 
-pub fn decode(value: [Field], value_len: u64) -> [Field] {
+/// Base64 decode the given value which can gave up to MAX_DECODE_LENGTH items.
+/// The actual content to be decoded has length that is defined by `value_len` 
+pub fn decode(value: [Option<Field>; MAX_DECODE_LENGTH], value_len: u64) -> [Field] {
   // data MUST be multiple of 4
   assert((value.len() as u64) == value_len);
   assert(value_len % 4 == 0);
 
   let chunk_count = value_len / 4;
   let remaining = value_len % 4;
-  let mut result = [];
+  let mut result: [Field] = [];
 
   for i in 0..chunk_count {
     let start_index = i * 4;
@@ -129,7 +134,7 @@ pub fn decode(value: [Field], value_len: u64) -> [Field] {
     ];
 
     let original_chunk = original(chunk, 4);
-    let decoded_chunk = stich(original_chunk);
+    let decoded_chunk = stich(original_chunk, 4);
     result = copy_decoded_chunk(result, decoded_chunk);
   }
 

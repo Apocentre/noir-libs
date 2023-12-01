@@ -2,5 +2,6 @@
 members = [
   "pad",
   "poly_root",
-  "base64"
+  "base64",
+  "collections",
 ]
