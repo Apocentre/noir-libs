@@ -111,20 +111,18 @@ pub fn decode(value: DynamicArray<Field, 2000>, value_len: u64) -> DynamicArray<
     extend_with_decode_chunk(&mut out, decoded_chunk);
   }
 
-  // if remaining != 0 {
-  //   // do the same for the remaining items
-  //   let mut remaining_chunk= DynamicArray::init();
+  if remaining != 0 {
+    // do the same for the remaining items
+    let mut remaining_chunk= DynamicArray::init();
 
-  //   for i in 0..remaining {
-  //     remaining_chunk.push(value.get((value_len - i - 1) as Field).unwrap());
-  //   }
+    for i in 0..remaining {
+      remaining_chunk.push(value.get((value_len - i - 1) as Field).unwrap());
+    }
 
-  //   let original_chunk = original(remaining_chunk);
-  //   let decoded_chunk = stich(original_chunk);
-  //   out.concat(decoded_chunk, 3);
-  // }
-
-  // std::println(out.len());
+    let original_chunk = original(remaining_chunk);
+    let decoded_chunk = stich(original_chunk);
+    extend_with_decode_chunk(&mut out, decoded_chunk);
+  }
 
   out
 }
@@ -137,8 +135,7 @@ fn test_decode_with_trailing_equal() {
   let encoded = DynamicArray::from_array(encode(value, 4), 8);
   let result = decode(encoded, 8);
 
-  // for i in 0..4 {
-  //   std::println(result[i]);
-  //   assert(result[i] == value[i]);
-  // }
+  for i in 0..4 {
+    assert(result.get(i).unwrap() == value[i]);
+  }
 }
