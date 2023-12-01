@@ -3,70 +3,63 @@ use dep::std;
 use crate::classic::{get_index_for_char, get_padding_char};
 use crate::encode::encode;
 
+fn remove_zeros(list: [Field], len: u64) -> [Field] {
+  let mut result: [Field] = [];
+
+  for i in 0..len {
+    let val = list[i];
+
+    if val != 0 {
+      result = result.push_back(val);
+    }
+  }
+
+  result
+}
+
 /// Reverse of split we're taking the various bits from two or more bytes and put it back together
 /// It takes a slice of bytes and returns another slice of bytes, containing a maximum of three 8-bit numbers.
 fn stich(chunk: [Field]) -> [Field] {
-  let len = chunk.len();
   let mut result: [Field] = [];
   let val_1 = chunk[0] as u8;
-  let val_2 = chunk[1] as u8;
+  let len = chunk.len();
 
   if len == 2 {
-    let mut tmp: [Field] = [];
+    let val_2 = chunk[1] as u8;
 
-    tmp = [
+    result = [
       ((val_1 & 63) << 2 | val_2 >> 4) as Field,
       ((val_2 & 15) << 4) as Field,
     ];
 
-    // remove 0s from final result
-    for i in 0..2 {
-      let val = tmp[i];
-      if val != 0 {
-        result = result.push_back(val);
-      }
-    }
+    result = remove_zeros(result, 2);
   } else {
-    let mut tmp: [Field] = [];
+    let val_2 = chunk[1] as u8;
     let val_3 = chunk[2] as u8;
 
     if len == 3 {
-      tmp = [
+      result = [
         ((val_1 & 63) << 2 | val_2 >> 4) as Field,
         ((val_2 & 15) << 4 | val_3 >> 2) as Field,
         ((val_3 & 3) << 6) as Field,
       ];
-
-      // remove 0s from final result
-      for i in 0..3 {
-        let val = tmp[i];
-        if val != 0 {
-          result = result.push_back(val);
-        }
-      }
     } else {
       let val_4 = chunk[3] as u8;
 
       // In case of a 3 byte input, we follow the same kind of steps to piece different parts of the bytes together to
       // form 4 output bytes each holding 6 bits of information.
       if len == 4 {
-        tmp = [
+        result = [
           ((val_1 & 63) << 2 | val_2 >> 4) as Field,
           ((val_2 & 15) << 4 | val_3 >> 2) as Field,
           ((val_3 & 3) << 6 | val_4 & 63) as Field,
         ];
-
-
-        // remove 0s from final result
-        for i in 0..3 {
-          let val = tmp[i];
-          if val != 0 {
-            result = result.push_back(val);
-          }
-        }
       } else {
         assert(false, "Chunk must have 2 to 4 items at most");
       }
+
+      std::println(result.len());
+      result = remove_zeros(result, 3);
     }
   };
 
