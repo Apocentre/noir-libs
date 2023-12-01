@@ -1,10 +1,8 @@
 use dep::std::option::Option;
 use dep::std;
+use dep::collections::dynamic_array::DynamicArray;
 use crate::classic::{get_index_for_char, get_padding_char};
 use crate::encode::encode;
-
-
-
 
 
 fn remove_zeros(list: [Field; 4]) -> [Option<Field>; 4] {
@@ -114,9 +112,9 @@ fn copy_decoded_chunk(mut result: [Field], decoded_chunk: [Field]) -> [Field] {
 
 /// Base64 decode the given value which can gave up to MAX_DECODE_LENGTH items.
 /// The actual content to be decoded has length that is defined by `value_len` 
-pub fn decode(value: [Option<Field>; MAX_DECODE_LENGTH], value_len: u64) -> [Field] {
+pub fn decode(value: DynamicArray<Field, 2000>) -> [Field] {
   // data MUST be multiple of 4
-  assert((value.len() as u64) == value_len);
+  let value_len = value.len();
   assert(value_len % 4 == 0);
 
   let chunk_count = value_len / 4;
@@ -124,13 +122,13 @@ pub fn decode(value: [Option<Field>; MAX_DECODE_LENGTH], value_len: u64) -> [Fie
   let mut result: [Field] = [];
 
   for i in 0..chunk_count {
-    let start_index = i * 4;
+    let start_index = (i * 4) as Field;
 
     let chunk = [
-      value[start_index],
-      value[start_index + 1],
-      value[start_index + 2],
-      value[start_index + 3],
+      value.get(start_index),
+      value.get(start_index + 1),
+      value.get(start_index + 2),
+      value.get(start_index + 3),
     ];
 
     let original_chunk = original(chunk, 4);
