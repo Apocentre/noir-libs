@@ -55,9 +55,8 @@ fn stich(chunk: DynamicArray<Field, 4>) -> DynamicArray<Field, 4> {
     let val_2 = chunk.get(1).unwrap() as u8;
     out.update(0, ((val_1 & 63) << 2 | val_2 >> 4) as Field);
     out.update(1, ((val_2 & 15) << 4) as Field);
+    out.filter(|v| v != 0);
 
-
-    out = remove_zeros(out, 2);
   } else {
     let val_2 = chunk.get(1).unwrap() as u8;
     let val_3 = chunk.get(2).unwrap() as u8;
@@ -67,22 +66,20 @@ fn stich(chunk: DynamicArray<Field, 4>) -> DynamicArray<Field, 4> {
       out.update(1, ((val_2 & 15) << 4 | val_3 >> 2) as Field);
       out.update(1, ((val_3 & 3) << 6) as Field);
     } else {
-      let val_4 = chunk[3] as u8;
+      let val_4 = chunk.get(3).unwrap() as u8;
 
       // In case of a 3 byte input, we follow the same kind of steps to piece different parts of the bytes together to
       // form 4 output bytes each holding 6 bits of information.
       if len == 4 {
-        out = [
-          ((val_1 & 63) << 2 | val_2 >> 4) as Field,
-          ((val_2 & 15) << 4 | val_3 >> 2) as Field,
-          ((val_3 & 3) << 6 | val_4 & 63) as Field,
-        ];
+        out.update(0, ((val_1 & 63) << 2 | val_2 >> 4) as Field);
+        out.update(0, ((val_2 & 15) << 4 | val_3 >> 2) as Field);
+        out.update(0, ((val_3 & 3) << 6 | val_4 & 63) as Field,);
       } else {
         assert(false, "Chunk must have 2 to 4 items at most");
       }
 
       std::println(out.len());
-      out = remove_zeros(out, 3);
+      out.filter(|v| v != 0);
     }
   };
 

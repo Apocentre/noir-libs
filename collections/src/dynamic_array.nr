@@ -98,6 +98,5 @@ impl <T, MAX_SIZE> DynamicArray<T, MAX_SIZE> {
         val.delete();
       }
     }
-      
   }
 }
