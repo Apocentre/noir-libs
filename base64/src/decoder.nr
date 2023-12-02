@@ -94,62 +94,62 @@ impl Decoder{
 
   /// Base64 decode the given value which can gave up to MAX_DECODE_LENGTH items.
   /// The actual content to be decoded has length that is defined by `value_len` 
-  pub fn decode(self, value: DynamicArray<Field, MAX_SIZE>) -> DynamicArray<Field, MAX_SIZE> {
-    let value_len = self.phantom.len() as u64;
-
+  pub fn decode(value: DynamicArray<Field, MAX_SIZE>) -> DynamicArray<Field, MAX_SIZE> {
     // data MUST be multiple of 4
-    assert(value_len == value.len());
-    assert(value_len % 4 == 0);
+    assert(value.len() % 4 == 0);
 
-    let chunk_count = value_len / 4;
-    let remaining = value_len % 4;
     let mut out = DynamicArray::init();
+    let mut chunk = DynamicArray::init();
 
-    for i in 0..chunk_count {
-      let start_index = (i * 4) as Field;
-      let mut chunk = DynamicArray::init();
+    for i in 0..MAX_SIZE as Field {
+      if (i * 4) as u64 < MAX_SIZE {
+        let start_index = (i * 4) as Field;
 
-      chunk.push(value.get(start_index).unwrap());
-      chunk.push(value.get(start_index + 1).unwrap());
-      chunk.push(value.get(start_index + 2).unwrap());
-      chunk.push(value.get(start_index + 3).unwrap());
+        if value.get(start_index).has_value() {
+          chunk.push(value.get(start_index).unwrap());
 
-      let original_chunk = Decoder::original(chunk);
-      let decoded_chunk = Decoder::stich(original_chunk);
+          if value.get(start_index + 1).has_value() {
+            chunk.push(value.get(start_index + 1).unwrap());
 
-      Decoder::extend_with_decoded_chunk(&mut out, decoded_chunk);
+            if value.get(start_index + 2).has_value() {
+              chunk.push(value.get(start_index + 2).unwrap());
+
+              if value.get(start_index + 3).has_value() {
+                chunk.push(value.get(start_index + 3).unwrap());
+
+                // decode chunk
+                let original_chunk = Decoder::original(chunk);
+                let decoded_chunk = Decoder::stich(original_chunk);
+                Decoder::extend_with_decoded_chunk(&mut out, decoded_chunk);
+
+                chunk = DynamicArray::init();
+              }
+            }
+          }
+        }  
+      }
     }
 
-    if remaining != 0 {
-      // do the same for the remaining items
-      let mut remaining_chunk= DynamicArray::init();
-
-      for i in 0..remaining {
-        remaining_chunk.push(value.get((value_len - i - 1) as Field).unwrap());
-      }
-
-      let original_chunk = Decoder::original(remaining_chunk);
+        // process the last the partial chunk which has fewer than 3 items
+    if chunk.len() != 0 {
+      let original_chunk = Decoder::original(chunk);
       let decoded_chunk = Decoder::stich(original_chunk);
       Decoder::extend_with_decoded_chunk(&mut out, decoded_chunk);
     }
 
     out
   }
-
 }
 
 #[test]
 fn test_decode_with_trailing_equal() {
   // "ABCD" in bytes
   let value = DynamicArray::from_array([65, 66, 67, 68]);
-  let encoder: Encoder = Encoder::new();
   // b64 encoded value is "QUJDRA=="
-
   let encoded = Encoder::encode(value);
-  // let decoder: Decoder = Decoder::new();
-  // let result = decoder.decode(encoded);
+  let result = Decoder::decode(encoded);
 
-  // for i in 0..4 {
-  //   assert(result.get(i).unwrap() == value.get(i).unwrap());
-  // }
+  for i in 0..4 {
+    assert(result.get(i).unwrap() == value.get(i).unwrap());
+  }
 }

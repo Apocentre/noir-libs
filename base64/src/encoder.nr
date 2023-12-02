@@ -96,7 +96,7 @@ impl Encoder {
       }
     }
 
-    // process las the partial chunk which has fewer than 3 items
+    // process the last the partial chunk which has fewer than 3 items
     if chunk.len() != 0 {
       let chunk = Encoder::split(chunk);
       let encoded_chunk = Encoder::encode_chunk(chunk);
