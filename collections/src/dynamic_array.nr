@@ -106,7 +106,7 @@ impl <T, MAX_SIZE> DynamicArray<T, MAX_SIZE> {
 
   pub fn update(&mut self, index: Field, value: T) {
     // you can only update an existing or deleted values
-    assert(self.data[index].is_null());
+    assert(!self.data[index].is_null());
     self.data[index] = Item::new(value);
   }
 
