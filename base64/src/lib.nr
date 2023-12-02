@@ -1,4 +1,4 @@
-mod encode;
-mod decode;
+mod encoder;
+mod decoder;
 mod classic;
 mod constants;
