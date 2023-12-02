@@ -5,15 +5,11 @@ use crate::{
   classic::{get_char_for_index, get_padding_char}, constants::MAX_SIZE,
 };
 
-struct Encoder<LEN> {
-  phantom: [Field; LEN]
-}
+struct Encoder;
 
-impl <LEN> Encoder<LEN> {
+impl Encoder {
   pub fn new() -> Self {
-    Self {
-      phantom: [0; LEN],
-    }
+    Self {}
   }
 
   /// Converts eight-bit bytes into six-bit bytes.
@@ -71,36 +67,38 @@ impl <LEN> Encoder<LEN> {
     out
   }
 
-  pub fn encode(self, value: DynamicArray<Field, MAX_SIZE>) -> DynamicArray<Field, MAX_SIZE> {
-    let value_len = self.phantom.len() as u64;
-    assert((value.len() as u64) == value_len);
-
-    let chunk_count = value_len / 3;
-    let remaining = value_len % 3;
+  pub fn encode(value: DynamicArray<Field, MAX_SIZE>) -> DynamicArray<Field, MAX_SIZE> {
     let mut out = DynamicArray::init();
+    let mut chunk = DynamicArray::init();
 
-    for i in 0..chunk_count {
-      let start_index = (i * 3) as Field;
-      let mut chunk = DynamicArray::init();
+    for i in 0..MAX_SIZE as Field {
+      if (i * 3) as u64 < MAX_SIZE {
+        let start_index = (i * 3) as Field;
 
-      chunk.push(value.get(start_index).unwrap());
-      chunk.push(value.get(start_index + 1).unwrap());
-      chunk.push(value.get(start_index + 2).unwrap());
+        if value.get(start_index).has_value() {
+          chunk.push(value.get(start_index).unwrap());
 
-      let chunk = Encoder::split(chunk);
-      let encoded_chunk = Encoder::encode_chunk(chunk);
-      out.concat(encoded_chunk, 4);
+          if value.get(start_index + 1).has_value() {
+            chunk.push(value.get(start_index + 1).unwrap());
+
+            if value.get(start_index + 2).has_value() {
+              chunk.push(value.get(start_index + 2).unwrap());
+
+              // process chunk
+              let split_chunk = Encoder::split(chunk);
+              let encoded_chunk = Encoder::encode_chunk(split_chunk);
+              out.concat(encoded_chunk, 4);
+
+              chunk = DynamicArray::init();
+            }
+          }
+        }
+      }
     }
 
-    if remaining != 0 {
-      // do the same for the remaining items
-      let mut remaining_chunk= DynamicArray::init();
-
-      for i in 0..remaining {
-        remaining_chunk.push(value.get((value_len - i - 1) as Field).unwrap());
-      }
-
-      let chunk = Encoder::split(remaining_chunk);
+    // process las the partial chunk which has fewer than 3 items
+    if chunk.len() != 0 {
+      let chunk = Encoder::split(chunk);
       let encoded_chunk = Encoder::encode_chunk(chunk);
       out.concat(encoded_chunk, 4);
     }
@@ -118,8 +116,7 @@ fn test_encode_with_trailing_equal() {
     81, 85, 74, 68,
     82, 65, get_padding_char() as Field, get_padding_char() as Field,
   ];
-  let encoder: Encoder<4> = Encoder::new();
-  let result = encoder.encode(value);
+  let result = Encoder::encode(value);
 
   for i in 0..8 {
     assert(result.get(i).unwrap() == expected[i]);
@@ -132,9 +129,8 @@ fn test_encode_no_trailing_equal() {
   let value =  DynamicArray::from_array([65, 66, 67]);
   // "QUJD" in bytes
   let expected = [81, 85, 74, 68];
-  let encoder: Encoder<3> = Encoder::new();
 
-  let result = encoder.encode(value);
+  let result = Encoder::encode(value);
 
   for i in 0..4 {
     assert(result.get(i).unwrap() == expected[i]);
