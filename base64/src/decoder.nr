@@ -130,7 +130,7 @@ impl Decoder{
       }
     }
 
-        // process the last the partial chunk which has fewer than 3 items
+    // process the last the partial chunk which has fewer than 3 items
     if chunk.len() != 0 {
       let original_chunk = Decoder::original(chunk);
       let decoded_chunk = Decoder::stich(original_chunk);
