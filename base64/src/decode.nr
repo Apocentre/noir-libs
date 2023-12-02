@@ -1,10 +1,9 @@
 use dep::std::option::Option;
 use dep::std;
 use dep::collections::dynamic_array::DynamicArray;
-use crate::classic::{get_index_for_char, get_padding_char};
-use crate::encode::encode;
-
-global MAX_SIZE: u64 = 200;
+use crate::{
+  classic::{get_index_for_char, get_padding_char}, constants::MAX_SIZE, encode::encode,
+};
 
 /// Reverse of split we're taking the various bits from two or more bytes and put it back together
 /// It takes a slice of bytes and returns another slice of bytes, containing a maximum of three 8-bit numbers.
@@ -69,7 +68,7 @@ fn original(chunk: DynamicArray<Field, 4>) -> DynamicArray<Field, 4> {
   out
 }
 
-fn extend_with_decode_chunk(out: &mut DynamicArray<Field, MAX_SIZE>, decoded_chunk: DynamicArray<Field, 4>) {
+fn extend_with_decoded_chunk(out: &mut DynamicArray<Field, MAX_SIZE>, decoded_chunk: DynamicArray<Field, 4>) {
   let len = decoded_chunk.len();
 
   if len == 1 {
@@ -108,7 +107,7 @@ pub fn decode(value: DynamicArray<Field, MAX_SIZE>, value_len: u64) -> DynamicAr
     let original_chunk = original(chunk);
     let decoded_chunk = stich(original_chunk);
 
-    extend_with_decode_chunk(&mut out, decoded_chunk);
+    extend_with_decoded_chunk(&mut out, decoded_chunk);
   }
 
   if remaining != 0 {
@@ -121,7 +120,7 @@ pub fn decode(value: DynamicArray<Field, MAX_SIZE>, value_len: u64) -> DynamicAr
 
     let original_chunk = original(remaining_chunk);
     let decoded_chunk = stich(original_chunk);
-    extend_with_decode_chunk(&mut out, decoded_chunk);
+    extend_with_decoded_chunk(&mut out, decoded_chunk);
   }
 
   out
@@ -130,12 +129,12 @@ pub fn decode(value: DynamicArray<Field, MAX_SIZE>, value_len: u64) -> DynamicAr
 #[test]
 fn test_decode_with_trailing_equal() {
   // "ABCD" in bytes
-  let value: [Field] = [65, 66, 67, 68];
+  let value = DynamicArray::from_array([65, 66, 67, 68], 4);
   // b64 encoded value is "QUJDRA=="
-  let encoded = DynamicArray::from_array(encode(value, 4), 8);
+  let encoded = encode(value, 4);
   let result = decode(encoded, 8);
 
   for i in 0..4 {
-    assert(result.get(i).unwrap() == value[i]);
+    assert(result.get(i).unwrap() == value.get(i).unwrap());
   }
 }
