@@ -73,10 +73,10 @@ impl <T, MAX_SIZE> DynamicArray<T, MAX_SIZE> {
     }
   }
 
-  pub fn from_array<OTHER_MAX_SIZE>(other: [T; OTHER_MAX_SIZE], other_len: u64) -> DynamicArray<T, MAX_SIZE> {
+  pub fn from_array<OTHER_MAX_SIZE>(other: [T; OTHER_MAX_SIZE]) -> DynamicArray<T, MAX_SIZE> {
     let mut l:  DynamicArray<T, MAX_SIZE> = DynamicArray::init();
 
-    for i in 0..other_len {
+    for i in 0..OTHER_MAX_SIZE {
       l.push(other[i as Field]);
     }
 
