@@ -140,7 +140,7 @@ fn test_encode_no_trailing_equal() {
 #[test]
 fn test_encode_b64_url() {
   // "ABC/+" in bytes
-  let value =  DynamicArray::from_array([65, 66, 67, 47, 43]);
+  let value = DynamicArray::from_array([65, 66, 67, 47, 43]);
   // "QUJDLys=" in bytes
   let expected = [81, 85, 74, 68, 76, 121, 115, get_padding_char() as Field];
 
