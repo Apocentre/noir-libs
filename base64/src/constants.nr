@@ -1,1 +1,1 @@
-global MAX_SIZE: u64 = 100q;
+global MAX_SIZE: u64 = 100;

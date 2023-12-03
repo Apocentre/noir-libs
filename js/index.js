@@ -37,7 +37,7 @@ const main = () => {
   // Adding three will have a strint that contains the offset_0 as a substring; So we don't need to take this into
   // account. We really have only three possbile version of the b64 encoded userId
   const offset_3 = btoa(fromByteArray(new Uint8Array([64, 64, 64, ...userId])));
-  
+
   console.log({offset_0, offset_1, offset_2, offset_3})
 
   // remove 4 bytes from start and end of offset_1 and offset_2
@@ -45,12 +45,13 @@ const main = () => {
   offset_2 = offset_2.slice(4).slice(0, -4);
 
   console.log({offset_0, offset_1, offset_2});
+  
+  const startIndex = data.jwt.indexOf(offset_1);
+
+  console.log('>>>>', startIndex)
 
   offset_0 = toByteArray(offset_0);
   const subLen = offset_0.length;
-
-  // we know that the offset_0 version is a the version that is part of the encoded jwt.
-  const startIndex = 483;
 
   // Assert that that offset_0 is indeed part of the encoded jwt
   for (let i = startIndex, j = 0; i < startIndex + subLen; i++, j++) {

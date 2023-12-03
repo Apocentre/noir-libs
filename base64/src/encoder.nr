@@ -72,7 +72,7 @@ impl Encoder {
     let mut chunk = DynamicArray::init();
 
     for i in 0..MAX_SIZE as Field {
-      if (i * 3) as u64 < MAX_SIZE {
+      if (i * 3) as u64 < MAX_SIZE - 3 {
         let start_index = (i * 3) as Field;
 
         if value.get(start_index).has_value() {
