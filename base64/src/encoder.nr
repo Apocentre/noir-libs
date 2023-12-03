@@ -2,7 +2,7 @@ use dep::std::option::Option;
 use dep::std;
 use dep::collections::dynamic_array::DynamicArray;
 use crate::{
-  classic::{get_char_for_index, get_padding_char}, constants::MAX_SIZE,
+  classic::{get_char_for_index, get_padding_char}, constants::{MAX_SIZE, MAX_ENCODED_SIZE},
 };
 
 struct Encoder;
@@ -67,7 +67,7 @@ impl Encoder {
     out
   }
 
-  pub fn encode(value: DynamicArray<Field, MAX_SIZE>) -> DynamicArray<Field, MAX_SIZE> {
+  pub fn encode(value: DynamicArray<Field, MAX_SIZE>) -> DynamicArray<Field, MAX_ENCODED_SIZE> {
     let mut out = DynamicArray::init();
     let mut chunk = DynamicArray::init();
 

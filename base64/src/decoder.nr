@@ -2,7 +2,7 @@ use dep::std::option::Option;
 use dep::std;
 use dep::collections::dynamic_array::DynamicArray;
 use crate::{
-  classic::{get_index_for_char, get_padding_char}, constants::MAX_SIZE, encoder::Encoder,
+  classic::{get_index_for_char, get_padding_char}, constants::{MAX_SIZE, MAX_ENCODED_SIZE}, encoder::Encoder,
 };
 
 
@@ -94,15 +94,15 @@ impl Decoder{
 
   /// Base64 decode the given value which can gave up to MAX_DECODE_LENGTH items.
   /// The actual content to be decoded has length that is defined by `value_len` 
-  pub fn decode(value: DynamicArray<Field, MAX_SIZE>) -> DynamicArray<Field, MAX_SIZE> {
+  pub fn decode(value: DynamicArray<Field, MAX_ENCODED_SIZE>) -> DynamicArray<Field, MAX_SIZE> {
     // data MUST be multiple of 4
     assert(value.len() % 4 == 0);
 
     let mut out = DynamicArray::init();
     let mut chunk = DynamicArray::init();
 
-    for i in 0..MAX_SIZE as Field {
-      if (i * 4) as u64 < MAX_SIZE {
+    for i in 0..MAX_ENCODED_SIZE as Field {
+      if (i * 4) as u64 < MAX_ENCODED_SIZE {
         let start_index = (i * 4) as Field;
 
         if value.get(start_index).has_value() {
