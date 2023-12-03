@@ -36,11 +36,6 @@ impl <T> Item<T> {
   fn is_null(self) -> bool {
     self.status == NULL
   }
-
-  fn delete(mut self) {
-    self.status = DELETED;
-    self.value = Option::none();
-  } 
 }
 
 struct DynamicArray<T, MAX_SIZE> {
@@ -122,12 +117,32 @@ impl <T, MAX_SIZE> DynamicArray<T, MAX_SIZE> {
     }
   }
 
+  pub fn delete(&mut self, index: Field) {
+    self.data[index].status = DELETED;
+    self.data[index].value = Option::none();
+  }
+
+  fn delete_front(&mut self, count: u64) {
+    for i in 0..count as Field{
+      self.delete(i as Field);
+    }
+  }
+
+  fn delete_back(&mut self, count: u64) {
+    let len = self.len();
+
+    for i in 0..count {
+      let index = len - i - 1;
+      self.delete(index as Field);
+    }
+  } 
+
   pub fn filter(&mut self, self_len: u64, p: fn(T) -> bool) {
     for i in 0..self_len {
-      let val = self.data[i];
+      let mut val = self.data[i];
 
       if val.has_value() & !p(val.unwrap()) {
-        val.delete();
+        self.delete(i as Field);
       }
     }
   }

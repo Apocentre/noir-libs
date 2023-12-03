@@ -15,7 +15,25 @@ fn big_loop() {
   }
 }
 
+fn reverse_loop(count: u64) {
+  let from = 1000;
+  let to = 1000 - count;
+
+  std::println(from);
+  std::println(to);
+
+
+  for _ in from..to {
+    std::println(">>>>>>>>>>");
+  }
+}
+
 #[test]
 fn test_big_loop() {
   big_loop();
+}
+
+#[test]
+fn test_reverse_loop() {
+  reverse_loop(100);
 }
