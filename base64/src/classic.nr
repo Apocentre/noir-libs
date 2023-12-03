@@ -66,9 +66,9 @@ pub fn get_index_for_char(character: u8) -> Option<u8> {
   base64_index
 }
 
-pub fn get_padding_char() -> u8 {
+pub fn get_padding_char() -> u16 {
   // this is the equvalent of '='. Not the actual ascii code but some arbitrary value
-  100
+  256
 }
 
 

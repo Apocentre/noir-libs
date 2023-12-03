@@ -66,7 +66,7 @@ impl Decoder{
           if Option::is_some(chr) {
             let ch = Option::unwrap(chr);
 
-            if ch != get_padding_char() {
+            if ch as u16 != get_padding_char() {
               out.push(ch as Field);
             }
           }
