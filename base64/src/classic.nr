@@ -21,8 +21,8 @@ pub fn get_char_for_index(index: u8) -> Option<u8> {
         ascii_index = Option::some(index - DIGITOFFSET);
       } else {
         if index == 62 {
-        // We want to replace + with - in ascii. '+' has index 43 in the ascii table 
-        // but we want to use index 45 which is the index of symbol -
+          // We want to replace + with - in ascii. '+' has index 43 in the ascii table 
+          // but we want to use index 45 which is the index of symbol -
           ascii_index = Option::some(45);
         } else {
           if index == 63 {

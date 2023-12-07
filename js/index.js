@@ -46,7 +46,7 @@ const main = () => {
 
   console.log({offset_0, offset_1, offset_2});
   
-  const startIndex = data.jwt.indexOf(offset_1);
+  const startIndex = data.jwt.indexOf(offset_2);
 
   console.log('>>>>', startIndex)
 

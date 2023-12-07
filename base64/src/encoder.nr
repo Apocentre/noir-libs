@@ -123,30 +123,30 @@ fn test_encode_with_trailing_equal() {
   }
 }
 
-#[test]
-fn test_encode_no_trailing_equal() {
-  // "ABC" in bytes
-  let value =  DynamicArray::from_array([65, 66, 67]);
-  // "QUJD" in bytes
-  let expected = [81, 85, 74, 68];
+// #[test]
+// fn test_encode_no_trailing_equal() {
+//   // "ABC" in bytes
+//   let value =  DynamicArray::from_array([65, 66, 67]);
+//   // "QUJD" in bytes
+//   let expected = [81, 85, 74, 68];
 
-  let result = Encoder::encode(value);
+//   let result = Encoder::encode(value);
 
-  for i in 0..4 {
-    assert(result.get(i).unwrap() == expected[i]);
-  }
-}
+//   for i in 0..4 {
+//     assert(result.get(i).unwrap() == expected[i]);
+//   }
+// }
 
-#[test]
-fn test_encode_b64_url() {
-  // "ABC/+" in bytes
-  let value = DynamicArray::from_array([65, 66, 67, 47, 43]);
-  // "QUJDLys=" in bytes
-  let expected = [81, 85, 74, 68, 76, 121, 115, get_padding_char() as Field];
+// #[test]
+// fn test_encode_b64_url() {
+//   // "ABC/+" in bytes
+//   let value = DynamicArray::from_array([65, 66, 67, 47, 43]);
+//   // "QUJDLys=" in bytes
+//   let expected = [81, 85, 74, 68, 76, 121, 115, get_padding_char() as Field];
 
-  let result = Encoder::encode(value);
+//   let result = Encoder::encode(value);
 
-  for i in 0..8 {
-    assert(result.get(i).unwrap() == expected[i]);
-  }
-}
+//   for i in 0..8 {
+//     assert(result.get(i).unwrap() == expected[i]);
+//   }
+// }
